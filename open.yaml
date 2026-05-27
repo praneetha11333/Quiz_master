@@ -1,0 +1,358 @@
+openapi: 3.0.3
+info:
+  title: Quiz App API
+  version: 1.0.0
+  description: API documentation for the Quiz Management System built with Flask
+servers:
+  - url: http://localhost:5000
+    description: Local server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+    ScoreSummary:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            type: integer
+paths:
+  /api/subject:
+    get:
+      summary: Get all subjects
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of subjects
+    post:
+      summary: Create a new subject
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        201:
+          $ref: '#/components/schemas/Message'
+
+  /api/subject/{id}:
+    delete:
+      summary: Delete a subject by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+
+  /api/chapter:
+    post:
+      summary: Add a chapter
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                subject_id:
+                  type: integer
+      responses:
+        201:
+          $ref: '#/components/schemas/Message'
+
+  /api/chapter/{id}:
+    patch:
+      summary: Update a chapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+    delete:
+      summary: Delete a chapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+
+  /api/question/{chap_id}:
+    get:
+      summary: Get all questions of a chapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chap_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of questions
+  /api/quizquestion:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                question_id:
+                  type: integer
+                quiz_id:
+                  type: string
+              required:
+              - quiz_id
+              - question_id
+        required: true
+      responses:
+        '201':
+          description: Question added to quiz
+      security:
+      - tokenAuth: []
+      summary: Add a question to a quiz
+  /api/quizquestion/{quiz_id}:
+    get:
+      parameters:
+      - in: path
+        name: quiz_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: List of quiz questions
+      security:
+      - tokenAuth: []
+      summary: Get all questions for a quiz
+  /api/question:
+    post:
+      summary: Add question to a chapter
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chap_id:
+                  type: integer
+                ques_statement:
+                  type: string
+                option1:
+                  type: string
+                option2:
+                  type: string
+                option3:
+                  type: string
+                option4:
+                  type: string
+                correct_op:
+                  type: integer
+      responses:
+        201:
+          $ref: '#/components/schemas/Message'
+
+  /api/question/id/{id}:
+    patch:
+      summary: Update question
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+    delete:
+      summary: Delete question
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+
+  /api/quiz:
+    post:
+      summary: Create quiz
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quiz_name:
+                  type: string
+                time_duration:
+                  type: integer
+                chapter_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        201:
+          $ref: '#/components/schemas/Message'
+
+  /api/quiz/{id}:
+    get:
+      summary: Get quiz by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Quiz info
+
+  /api/submitanswer:
+    post:
+      summary: Submit user answers
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quiz_id:
+                  type: integer
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      question_id:
+                        type: integer
+                      answer:
+                        type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+
+  /api/savescores:
+    post:
+      summary: Save user's quiz score
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quiz_id:
+                  type: integer
+                score:
+                  type: integer
+      responses:
+        200:
+          $ref: '#/components/schemas/Message'
+
+  /api/showscore:
+    get:
+      summary: Show all scores of current user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of scores
+
+  /api/getscore:
+    get:
+      summary: Get detailed result of a quiz attempt
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Detailed question-wise result
+
+  /api/usersummary:
+    get:
+      summary: Quiz summary of current user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreSummary'
+
+  /api/quiz-attempts:
+    get:
+      summary: Number of attempts per quiz
+      responses:
+        200:
+          description: Count per quiz
